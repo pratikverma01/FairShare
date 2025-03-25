@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <script defer src="dashboard.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <header>
+            <h1>Dashboard</h1>
+            <button id="logout">Logout</button>
+        </header>
+
+        <!-- Admin Operations (Only for Admin) -->
+        <div id="admin-operations" class="admin-only">
+            <h2>Manage Transactions</h2>
+            <form id="transaction-form">
+                <label>Amount:</label>
+                <input type="number" id="amount" required>
+
+                <label>Transaction Type:</label>
+                <select id="transaction-type">
+                    <option value="deposit">Deposit</option>
+                    <option value="withdraw">Withdraw</option>
+                </select>
+
+                <label>Given By:</label>
+                <input type="text" id="given-by" required>
+
+                <label>Given To:</label>
+                <input type="text" id="given-to" required>
+
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+
+        <!-- Transaction History Table (Visible to Everyone) -->
+        <h2>Transaction History</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Amount</th>
+                    <th>Type</th>
+                    <th>Given By</th>
+                    <th>Given To</th>
+                    <th>Date & Time</th>
+                    <th class="admin-only">Action</th>
+                </tr>
+            </thead>
+            <tbody id="transaction-table">
+                <!-- Transactions will be dynamically loaded here -->
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
