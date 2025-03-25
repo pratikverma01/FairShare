@@ -3,30 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile Page</title>
+    <title>FairShare - User Profile</title>
     <link rel="stylesheet" href="profile.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
 <body>
-
-    <button id="profileBtn">Open Profile</button>
-
-    <div id="profileModal" class="profile-container">
-        <div class="profile-card">
-            <span class="close-btn" id="closeBtn">&times;</span>
-            <h2>My Profile</h2>
-            <img src="https://via.placeholder.com/120" alt="Profile Picture" id="profilePic">
-            <input type="file" id="uploadPic" accept="image/*">
-            
-            <div class="info">
-                <label>Name:</label>
-                <input type="text" id="profileName" value="John Doe">
+    <div class="profile-container">
+        <div class="profile-header">
+            <input type="file" id="profilePicInput" accept="image/*" hidden>
+            <div class="profile-pic-container">
+                <img id="profilePic" src="default-profile.png" alt="Profile Picture" class="profile-pic" onclick="changeProfilePic()">
+                <label for="profilePicInput" class="upload-icon"><i class="fa fa-camera"></i></label>
             </div>
-            <div class="info">
-                <label>Email:</label>
-                <input type="email" id="profileEmail" value="johndoe@example.com">
-            </div>
+            <h2 id="userName">John Doe</h2>
+            <p class="user-role">Flatmate | Budget Manager</p>
+        </div>
 
-            <button id="saveBtn">Save</button>
+        <div class="profile-details">
+            <div class="detail-item">
+                <i class="fa fa-envelope"></i> 
+                <span id="userEmail">john.doe@example.com</span>
+            </div>
+            <div class="detail-item">
+                <i class="fa fa-phone"></i> 
+                <span id="userPhone">+123 456 7890</span>
+            </div>
+            <div class="detail-item">
+                <i class="fa fa-info-circle"></i> 
+                <span id="userBio">Living life, one budget at a time.</span>
+            </div>
+        </div>
+
+        <div class="profile-actions">
+            <button class="edit-btn" onclick="editProfile()"><i class="fa fa-edit"></i> Edit Profile</button>
+            <button class="logout-btn"><i class="fa fa-sign-out-alt"></i> Logout</button>
         </div>
     </div>
 

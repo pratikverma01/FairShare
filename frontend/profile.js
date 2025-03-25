@@ -1,54 +1,29 @@
-document.getElementById("profileBtn").addEventListener("click", function() {
-    document.getElementById("profileModal").style.display = "flex";
+// Function to change the profile picture
+function changeProfilePic() {
+    document.getElementById('profilePicInput').click();
+}
+
+// Handle profile picture upload
+document.getElementById('profilePicInput').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('profilePic').src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
 });
 
-document.getElementById("closeBtn").addEventListener("click", function() {
-    document.getElementById("profileModal").style.display = "none";
-});
+// Function to edit profile details
+function editProfile() {
+    let newName = prompt("Enter your new name:", document.getElementById('userName').innerText);
+    let newEmail = prompt("Enter your new email:", document.getElementById('userEmail').innerText);
+    let newPhone = prompt("Enter your new phone number:", document.getElementById('userPhone').innerText);
+    let newBio = prompt("Enter your new bio:", document.getElementById('userBio').innerText);
 
-// Save User Data (LocalStorage)
-document.getElementById("saveBtn").addEventListener("click", function() {
-    let name = document.getElementById("profileName").value;
-    let email = document.getElementById("profileEmail").value;
-    
-    localStorage.setItem("userName", name);
-    localStorage.setItem("userEmail", email);
-
-    alert("Profile Updated!");
-});
-
-// Load User Data from LocalStorage
-window.onload = function() {
-    if (localStorage.getItem("userName")) {
-        document.getElementById("profileName").value = localStorage.getItem("userName");
-    }
-    if (localStorage.getItem("userEmail")) {
-        document.getElementById("profileEmail").value = localStorage.getItem("userEmail");
-    }
-};
-
-// Change Profile Picture
-document.getElementById("uploadPic").addEventListener("change", function(event) {
-    const reader = new FileReader();
-    reader.onload = function() {
-        const imgElement = document.getElementById("profilePic");
-        imgElement.src = reader.result;
-
-        // Save profile pic in localStorage
-        localStorage.setItem("profilePic", reader.result);
-    };
-    reader.readAsDataURL(event.target.files[0]);
-});
-
-// Load Profile Picture from LocalStorage
-window.onload = function() {
-    if (localStorage.getItem("profilePic")) {
-        document.getElementById("profilePic").src = localStorage.getItem("profilePic");
-    }
-    if (localStorage.getItem("userName")) {
-        document.getElementById("profileName").value = localStorage.getItem("userName");
-    }
-    if (localStorage.getItem("userEmail")) {
-        document.getElementById("profileEmail").value = localStorage.getItem("userEmail");
-    }
-};
+    if (newName) document.getElementById('userName').innerText = newName;
+    if (newEmail) document.getElementById('userEmail').innerText = newEmail;
+    if (newPhone) document.getElementById('userPhone').innerText = newPhone;
+    if (newBio) document.getElementById('userBio').innerText = newBio;
+}
