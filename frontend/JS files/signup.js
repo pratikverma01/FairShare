@@ -30,19 +30,29 @@ async function signUp() {
         return;
     }
 
+    let endpoint = userType === "admin" ? "signup/admin" : "signup/user"; // Use correct API route
+
     try {
-        const response = await fetch("http://localhost:5000/signup", {
+        const response = await fetch(`http://localhost:5000/${endpoint}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, password, room_code: roomCode, userType })
+            body: JSON.stringify({ username, password, room_code: roomCode })
         });
 
         const data = await response.json();
+
         if (response.ok) {
-            Swal.fire("Success!", "Account created!", "success");
-            setTimeout(() => { window.location.href = "index.html"; }, 2000);
+            Swal.fire({
+                title: "Success!",
+                text: "Account created successfully!",
+                icon: "success",
+                timer: 2000, // Wait for 2 seconds
+                showConfirmButton: false
+            }).then(() => {
+                window.location.href = "homepage.html"; // Adjust path if needed
+            });
         } else {
-            Swal.fire("Signup Failed!", data.message, "error");
+            Swal.fire("Signup Failed!", data.error || "Please try again", "error");
         }
     } catch (error) {
         console.error("Signup Error:", error);

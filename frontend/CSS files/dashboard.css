@@ -1,0 +1,212 @@
+/* 🌟 General Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    animation: fadeIn 0.8s ease-in-out;
+}
+
+/* 🔹 Dashboard Container */
+.dashboard-container {
+    width: 95%;
+    max-width: 1000px;
+    background: linear-gradient(135deg, #ffffff, #f3f7ff);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.25);
+    animation: fadeIn 0.6s ease-in-out;
+    transition: all 0.3s ease-in-out;
+}
+
+.dashboard-container:hover {
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* 🔹 Header */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: white;
+    padding: 18px;
+    border-radius: 10px;
+    font-size: 22px;
+    animation: slideDown 0.5s ease-in-out;
+}
+
+/* 🔹 Logout Button */
+header button {
+    background: red;
+    color: white;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s ease-in-out;
+}
+
+header button:hover {
+    background: darkred;
+    transform: scale(1.1);
+}
+
+/* 🔹 Admin Operations */
+#admin-operations {
+    background: linear-gradient(135deg, #f9f9f9, #eef2ff);
+    padding: 25px;
+    border-radius: 10px;
+    margin-top: 20px;
+    box-shadow: 0px 3px 7px rgba(0, 0, 0, 0.2);
+    animation: fadeIn 0.6s ease-in-out;
+}
+
+/* Form Styles */
+#admin-operations form {
+    display: flex;
+    flex-direction: column;
+}
+
+#admin-operations label {
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+#admin-operations input, 
+#admin-operations select, 
+#admin-operations button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 6px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+
+#admin-operations button {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease-in-out;
+    margin-top: 15px;
+}
+
+#admin-operations button:hover {
+    background: linear-gradient(135deg, #43A047, #3d8f40);
+    transform: scale(1.05);
+}
+
+/* 🔹 Hide fields until selected */
+.hidden {
+    display: none;
+}
+
+/* 🔹 Show fields smoothly when selected */
+#transaction-details {
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: opacity 0.3s ease-in-out, max-height 0.3s ease-in-out;
+}
+
+#transaction-details.show {
+    opacity: 1;
+    max-height: 500px;
+}
+
+/* 🔹 Transactions Table */
+.table-container {
+    overflow-x: auto;
+    margin-top: 20px;
+    border-radius: 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0px 3px 7px rgba(0, 0, 0, 0.2);
+}
+
+table th, table td {
+    padding: 14px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+thead {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: white;
+}
+
+/* 🔹 Search & Sorting */
+.filter-options {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.filter-options input, 
+.filter-options select {
+    padding: 12px;
+    width: 48%;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+/* 🔹 Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 🌟 Responsive Design */
+@media (max-width: 768px) {
+    body {
+        align-items: flex-start;
+        padding-top: 20px;
+    }
+
+    .dashboard-container {
+        width: 90%;
+        padding: 20px;
+    }
+
+    header {
+        font-size: 18px;
+        padding: 12px;
+    }
+
+    header button {
+        padding: 10px 14px;
+        font-size: 14px;
+    }
+
+    table th, table td {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .filter-options {
+        flex-direction: column;
+    }
+
+    .filter-options input, .filter-options select {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}

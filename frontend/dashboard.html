@@ -4,56 +4,72 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <link rel="stylesheet" href="dashboard.css">
-    <script defer src="dashboard.js"></script>
+    <link rel="stylesheet" href="CSS files/dashboard.css">
+    <script defer src="JS files/dashboard.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- Alert Library -->
 </head>
 <body>
     <div class="dashboard-container">
+        <!-- 🌟 Header -->
         <header>
             <h1>Dashboard</h1>
             <button id="logout">Logout</button>
         </header>
 
-        <!-- Admin Operations (Only for Admin) -->
-        <div id="admin-operations" class="admin-only">
+        <!-- 🔹 Admin Operations (Only for Admin) -->
+        <div id="admin-operations" class="admin-only hidden">
             <h2>Manage Transactions</h2>
             <form id="transaction-form">
                 <label>Amount:</label>
                 <input type="number" id="amount" required>
-
+            
                 <label>Transaction Type:</label>
                 <select id="transaction-type">
+                    <option value="" disabled selected>Select Transaction Type</option>
                     <option value="deposit">Deposit</option>
                     <option value="withdraw">Withdraw</option>
                 </select>
-
-                <label>Given By:</label>
-                <input type="text" id="given-by" required>
-
-                <label>Given To:</label>
-                <input type="text" id="given-to" required>
-
+            
+                <!-- Transaction Details -->
+                <div id="transaction-details" class="hidden">
+                    <label>Purpose:</label>
+                    <input type="text" id="purpose" required>
+            
+                    <div id="given-by-container" class="hidden">
+                        <label>Given By:</label>
+                        <input type="text" id="given-by">
+                    </div>
+                    
+                    <div id="given-to-container" class="hidden">
+                        <label>Given To:</label>
+                        <input type="text" id="given-to">
+                    </div>
+                </div>
+            
                 <button type="submit">Submit</button>
             </form>
         </div>
 
-        <!-- Transaction History Table (Visible to Everyone) -->
+        <!-- 🔹 Transaction History Table -->
         <h2>Transaction History</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Amount</th>
-                    <th>Type</th>
-                    <th>Given By</th>
-                    <th>Given To</th>
-                    <th>Date & Time</th>
-                    <th class="admin-only">Action</th>
-                </tr>
-            </thead>
-            <tbody id="transaction-table">
-                <!-- Transactions will be dynamically loaded here -->
-            </tbody>
-        </table>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Amount</th>
+                        <th>Type</th>
+                        <th>Given By</th>
+                        <th>Given To</th>
+                        <th>Purpose</th>
+                        <th>Date & Time</th>
+                        <th class="admin-only">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="transaction-table">
+                    <!-- Transactions will be dynamically loaded here -->
+                </tbody>
+            </table>
+        </div>
     </div>
 </body>
 </html>
