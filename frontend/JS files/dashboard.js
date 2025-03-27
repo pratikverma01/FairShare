@@ -1,128 +1,273 @@
-document.addEventListener("DOMContentLoaded", async () => {
-    const transactionForm = document.getElementById("transaction-form");
-    const transactionTable = document.getElementById("transaction-table");
-    const logoutButton = document.getElementById("logout");
-    const transactionType = document.getElementById("transaction-type");
-    const givenByField = document.getElementById("given-by").parentElement;
-    const givenToField = document.getElementById("given-to").parentElement;
-    const purposeField = document.getElementById("purpose");
-    const transactionDetails = document.getElementById("transaction-details");
+let transactions = []; // Store all transactions
+let currentPage = 1;
+const transactionsPerPage = 10;
 
-    const userType = localStorage.getItem("userType"); // "admin" or "user"
-
-    // 🌟 Admin only: Show admin operations
-    if (userType === "admin") {
-        document.querySelectorAll(".admin-only").forEach(el => el.style.display = "table-cell");
-        document.getElementById("admin-operations").classList.remove("hidden");
-    }
-
-    // 🔹 Hide fields initially
-    givenByField.classList.add("hidden");
-    givenToField.classList.add("hidden");
-    transactionDetails.classList.add("hidden");
-
-    // 🔹 Show/hide fields based on transaction type
-    transactionType.addEventListener("change", () => {
-        const type = transactionType.value;
-
-        if (type === "deposit") {
-            givenByField.classList.remove("hidden"); // Show Given By
-            givenToField.classList.add("hidden");   // Hide Given To
-        } else if (type === "withdraw") {
-            givenToField.classList.remove("hidden"); // Show Given To
-            givenByField.classList.add("hidden");   // Hide Given By
-        }
-
-        transactionDetails.classList.remove("hidden"); // Show transaction details
-    });
-    // transactionType.addEventListener("change", () => {
-    //     transactionDetails.classList.add("show"); // Smooth fade-in
-    // });
+// Function to add a new transaction
+function confirmTransaction() {
+    let amount = document.getElementById("amount").value;
+    let person = transactionType === "Add Money" 
+        ? document.getElementById("givenBy").value 
+        : document.getElementById("givenTo").value;
     
-
-    // 🔹 Load Transactions from MySQL
-    async function loadTransactions() {
-        try {
-            const response = await fetch("http://localhost:5000/getTransactions");
-            const transactions = await response.json();
-
-            // 📝 Render transactions
-            transactionTable.innerHTML = "";
-            transactions.forEach(tx => {
-                transactionTable.innerHTML += `
-                    <tr>
-                        <td>${tx.amount}</td>
-                        <td>${tx.type}</td>
-                        <td>${tx.type === "deposit" ? tx.givenBy : "-"}</td>
-                        <td>${tx.type === "withdraw" ? tx.givenTo : "-"}</td>
-                        <td>${tx.purpose}</td>
-                        <td>${new Date(tx.date).toLocaleString()}</td>
-                        <td class="admin-only">
-                            <button class="delete-btn" data-id="${tx.id}">❌ Delete</button>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            // ❌ Delete Transactions (Admin Only)
-            document.querySelectorAll(".delete-btn").forEach(btn => {
-                btn.addEventListener("click", async (e) => {
-                    const transactionId = e.target.getAttribute("data-id");
-                    await fetch(`http://localhost:5000/deleteTransaction/${transactionId}`, { method: "DELETE" });
-                    loadTransactions();
-                });
-            });
-
-        } catch (error) {
-            console.error("Error loading transactions:", error);
-        }
+    if (!amount || !person) {
+        alert("Please fill all fields!");
+        return;
     }
 
-    // ✅ Submit Transaction (Admin Only)
-    transactionForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const amount = document.getElementById("amount").value;
-        const type = transactionType.value;
-        const givenBy = type === "deposit" ? document.getElementById("given-by").value : "";
-        const givenTo = type === "withdraw" ? document.getElementById("given-to").value : "";
-        const purpose = purposeField.value.trim();
-
-        // ⚠️ Input Validation
-        if (!amount || !type || !purpose || (type === "deposit" && !givenBy) || (type === "withdraw" && !givenTo)) {
-            Swal.fire("Error", "Please fill all required fields!", "error");
-            return;
-        }
-
-        // 🔄 Send data to backend
-        await fetch("http://localhost:5000/addTransaction", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ amount, type, givenBy, givenTo, purpose })
-        });
-
-        Swal.fire("Success", "Transaction added!", "success");
-        loadTransactions();
-        transactionForm.reset();
-        
-        // Hide extra fields after submission
-        transactionDetails.classList.add("hidden");
-        givenByField.classList.add("hidden");
-        givenToField.classList.add("hidden");
+    // Store new transaction at the beginning (to keep newest first)
+    transactions.unshift({
+        date: new Date().toLocaleDateString(),
+        user: person,
+        amount: `$${amount}`,
+        type: transactionType
     });
 
-    // 🚪 Logout
-    logoutButton.addEventListener("click", () => {
-        localStorage.clear();
-        Swal.fire({
-            title: "Logged Out",
-            text: "You have successfully logged out.",
-            icon: "success",
-            timer: 2000,
-            showConfirmButton: false
-        }).then(() => {
-            window.location.href = "signin.html";
-        });
+    // Reset to first page when adding a new transaction
+    currentPage = 1;
+    
+    updateTable(); // Refresh table
+
+    // Reset Form
+    document.getElementById("amount").value = "";
+    document.getElementById("givenBy").value = "";
+    document.getElementById("givenTo").value = "";
+
+    document.getElementById("givenBy").style.display = "none";
+    document.getElementById("givenTo").style.display = "none";
+
+    document.querySelector(".add-money").style.display = "block";
+    document.querySelector(".withdraw-money").style.display = "block";
+    document.querySelector(".confirm-btn").style.display = "none";
+}
+
+// Function to update the transaction table
+function updateTable() {
+    let transactionTable = document.getElementById("transactionTable");
+    transactionTable.innerHTML = ""; // Clear existing table data
+
+    let totalPages = Math.ceil(transactions.length / transactionsPerPage);
+    if (currentPage > totalPages) {
+        currentPage = totalPages || 1; // Ensure page is within valid range
+    }
+
+    let startIndex = (currentPage - 1) * transactionsPerPage;
+    let endIndex = startIndex + transactionsPerPage;
+    let visibleTransactions = transactions.slice(startIndex, endIndex);
+
+    visibleTransactions.forEach(transaction => {
+        let newRow = transactionTable.insertRow();
+        newRow.innerHTML = `
+            <td>${transaction.date}</td>
+            <td>${transaction.user}</td>
+            <td>${transaction.amount}</td>
+            <td>${transaction.type}</td>
+            <td><button onclick="deleteTransaction('${transaction.date}', '${transaction.user}')">🗑 Delete</button></td>
+        `;
     });
 
-    loadTransactions();
+    updatePagination(); // Update pagination controls
+}
+
+// Function to delete a transaction
+function deleteTransaction(date, user) {
+    transactions = transactions.filter(t => !(t.date === date && t.user === user));
+    updateTable(); // Refresh table
+}
+
+// Function for pagination controls
+// Function to update pagination controls
+function updatePagination() {
+    let totalPages = Math.ceil(transactions.length / transactionsPerPage);
+    let paginationContainer = document.getElementById("paginationContainer");
+
+    if (totalPages > 1) {
+        paginationContainer.style.display = "block"; // Show pagination if more than 1 page
+    } else {
+        paginationContainer.style.display = "none"; // Hide pagination if only 1 page
+    }
+
+    document.getElementById("pageInfo").textContent = `Page ${currentPage} of ${totalPages || 1}`;
+    document.getElementById("prevBtn").disabled = currentPage === 1;
+    document.getElementById("nextBtn").disabled = currentPage >= totalPages;
+}
+
+
+
+// Function to go to the previous page
+function prevPage() {
+    if (currentPage > 1) {
+        currentPage--;
+        updateTable();
+    }
+}
+
+// Function to go to the next page
+function nextPage() {
+    let totalPages = Math.ceil(transactions.length / transactionsPerPage);
+    if (currentPage < totalPages) {
+        currentPage++;
+        updateTable();
+    }
+}
+
+
+
+function loadTransactions() {
+    let table = document.getElementById("transactionTable");
+    table.innerHTML = "";
+
+    transactions.forEach((t) => {
+        let row = `<tr>
+            <td>${t.date}</td>
+            <td>${t.user}</td>
+            <td>${t.amount}</td>
+            <td>${t.status}</td>
+        </tr>`;
+        table.innerHTML += row;
+    });
+}
+
+function searchTransactions() {
+    let userName = document.getElementById("searchUser").value.toLowerCase();
+    let searchDate = document.getElementById("searchDate").value;
+
+    let filtered = transactions.filter(t => 
+        (userName ? t.user.toLowerCase().includes(userName) : true) &&
+        (searchDate ? t.date === searchDate : true)
+    );
+
+    let table = document.getElementById("transactionTable");
+    table.innerHTML = "";
+
+    filtered.forEach((t) => {
+        let row = `<tr>
+            <td>${t.date}</td>
+            <td>${t.user}</td>
+            <td>${t.amount}</td>
+            <td>${t.status}</td>
+        </tr>`;
+        table.innerHTML += row;
+    });
+}
+
+function toggleTheme() {
+    document.body.classList.toggle("dark-mode");
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    let sidebar = document.getElementById("sidebar");
+    let mainContent = document.getElementById("mainContent");
+
+    // Ensure sidebar is closed when the page loads
+    sidebar.classList.add("hidden");
+    mainContent.classList.add("expanded");
 });
+
+function toggleSidebar() {
+    let sidebar = document.getElementById("sidebar");
+    let mainContent = document.getElementById("mainContent");
+    let toggleBtn = document.getElementById("floatingToggle");
+
+    if (sidebar.classList.contains("hidden")) {
+        sidebar.classList.remove("hidden"); // Show Sidebar
+        mainContent.classList.remove("expanded"); // Move Dashboard
+        toggleBtn.style.display = "none"; // Hide Floating Button
+    } else {
+        sidebar.classList.add("hidden"); // Hide Sidebar
+        mainContent.classList.add("expanded"); // Expand Dashboard
+        toggleBtn.style.display = "block"; // Show Floating Button
+    }
+}
+
+
+
+function filterTransactions() {
+    let selectedMonth = document.getElementById("monthFilter").value;
+    let allTransactions = document.querySelectorAll("#transactionTable tr"); // Get all transactions
+    let count = 0;
+
+    allTransactions.forEach(row => {
+        let dateCell = row.querySelector("td:first-child"); // Get date column
+        if (dateCell) {
+            let transactionDate = new Date(dateCell.textContent);
+            let transactionMonth = transactionDate.getMonth() + 1; // Get month (1-12)
+
+            if (selectedMonth === "all" || transactionMonth == selectedMonth) {
+                row.style.display = ""; // Show matching transactions
+                count++;
+            } else {
+                row.style.display = "none"; // Hide non-matching transactions
+            }
+        }
+    });
+
+    document.getElementById("totalTransactions").textContent = count; // Update transaction count
+}
+
+let transactionType = ""; // Stores whether it's "Add" or "Withdraw"
+
+function showGivenBy() {
+    transactionType = "Add Money";
+    document.getElementById("givenBy").style.display = "block";
+    document.getElementById("givenTo").style.display = "none";
+    
+    document.querySelector(".add-money").style.display = "none";
+    document.querySelector(".withdraw-money").style.display = "none";
+    document.querySelector(".confirm-btn").style.display = "block";
+}
+
+function showGivenTo() {
+    transactionType = "Withdraw Money";
+    document.getElementById("givenBy").style.display = "none";
+    document.getElementById("givenTo").style.display = "block";
+    
+    document.querySelector(".add-money").style.display = "none";
+    document.querySelector(".withdraw-money").style.display = "none";
+    document.querySelector(".confirm-btn").style.display = "block";
+}
+
+function confirmTransaction() {
+    let amount = document.getElementById("amount").value;
+    let person = transactionType === "Add Money" 
+        ? document.getElementById("givenBy").value 
+        : document.getElementById("givenTo").value;
+    
+    if (!amount || !person) {
+        alert("Please fill all fields!");
+        return;
+    }
+
+    let transactionTable = document.getElementById("transactionTable");
+    let newRow = transactionTable.insertRow();
+
+    newRow.innerHTML = `
+        <td>${new Date().toLocaleDateString()}</td>
+        <td>${person}</td>
+        <td>$${amount}</td>
+        <td>${transactionType}</td>
+        <td><button onclick="deleteTransaction(this)">🗑 Delete</button></td>
+    `;
+
+    // Reset Form
+    document.getElementById("amount").value = "";
+    document.getElementById("givenBy").value = "";
+    document.getElementById("givenTo").value = "";
+
+    document.getElementById("givenBy").style.display = "none";
+    document.getElementById("givenTo").style.display = "none";
+
+    document.querySelector(".add-money").style.display = "block";
+    document.querySelector(".withdraw-money").style.display = "block";
+    document.querySelector(".confirm-btn").style.display = "none";
+}
+
+// Function to delete a transaction
+// function deleteTransaction(button) {
+//     button.parentElement.parentElement.remove();
+// }
+
+
+
+
+// Load transactions on page load
+window.onload = loadTransactions;
