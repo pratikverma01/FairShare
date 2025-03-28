@@ -261,6 +261,116 @@ function confirmTransaction() {
     document.querySelector(".confirm-btn").style.display = "none";
 }
 
+// Include Chart.js in HTML
+// <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+// Initialize Data
+let balanceHistory = {
+    labels: [], // Dates
+    datasets: [{
+        label: "Total Balance Over Time",
+        data: [], // Balance at each transaction
+        backgroundColor: "rgba(75, 192, 192, 0.5)",
+        borderColor: "rgba(75, 192, 192, 1)",
+        borderWidth: 2,
+        fill: false
+    }]
+};
+
+// Create Chart
+let ctx = document.getElementById("balanceChart").getContext("2d");
+let balanceChart = new Chart(ctx, {
+    type: "line", // Line chart for balance trend
+    data: balanceHistory,
+    options: {
+        responsive: true,
+        scales: {
+            y: { beginAtZero: false }
+        }
+    }
+});
+
+// Function to Update Chart When Transactions Are Added
+function updateBalanceChart(transactionDate, newBalance) {
+    let formattedDate = new Date(transactionDate).toLocaleDateString();
+
+    balanceHistory.labels.push(formattedDate);
+    balanceHistory.datasets[0].data.push(newBalance);
+
+    balanceChart.update(); // Refresh Chart
+}
+
+// Function to Filter Balance Chart by Month
+function filterBalanceChart() {
+    let selectedMonth = document.getElementById("balanceMonthFilter").value;
+
+    if (selectedMonth === "all") {
+        balanceChart.data.labels = balanceHistory.labels;
+        balanceChart.data.datasets[0].data = balanceHistory.datasets[0].data;
+    } else {
+        let monthIndex = parseInt(selectedMonth) - 1;
+        let filteredLabels = [];
+        let filteredData = [];
+
+        balanceHistory.labels.forEach((date, index) => {
+            let dateObj = new Date(date);
+            if (dateObj.getMonth() === monthIndex) {
+                filteredLabels.push(date);
+                filteredData.push(balanceHistory.datasets[0].data[index]);
+            }
+        });
+
+        balanceChart.data.labels = filteredLabels;
+        balanceChart.data.datasets[0].data = filteredData;
+    }
+
+    balanceChart.update();
+}
+
+// Function to Confirm Transaction & Update Chart
+function confirmTransaction() {
+    let amount = document.getElementById("amount").value;
+    let person = transactionType === "Add Money" 
+        ? document.getElementById("givenBy").value 
+        : document.getElementById("givenTo").value;
+    
+    if (!amount || !person) {
+        alert("Please fill all fields!");
+        return;
+    }
+
+    let transactionDate = new Date().toISOString();
+    let newBalance = parseFloat(document.getElementById("totalBalance").textContent.replace("$", "")) + 
+                     (transactionType === "Add Money" ? parseFloat(amount) : -parseFloat(amount));
+
+    // Update UI
+    document.getElementById("totalBalance").textContent = `$${newBalance.toFixed(2)}`;
+
+    // Store new transaction
+    transactions.unshift({
+        date: new Date().toLocaleDateString(),
+        user: person,
+        amount: `$${amount}`,
+        type: transactionType
+    });
+
+    updateTable(); // Refresh transaction table
+    updateBalanceChart(transactionDate, newBalance); // Update Chart
+
+    // Reset Form
+    document.getElementById("amount").value = "";
+    document.getElementById("givenBy").value = "";
+    document.getElementById("givenTo").value = "";
+
+    document.getElementById("givenBy").style.display = "none";
+    document.getElementById("givenTo").style.display = "none";
+
+    document.querySelector(".add-money").style.display = "block";
+    document.querySelector(".withdraw-money").style.display = "block";
+    document.querySelector(".confirm-btn").style.display = "none";
+}
+
+
 // Function to delete a transaction
 // function deleteTransaction(button) {
 //     button.parentElement.parentElement.remove();
