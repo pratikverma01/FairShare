@@ -8,32 +8,34 @@ function confirmTransaction() {
     let person = transactionType === "Add Money" 
         ? document.getElementById("givenBy").value 
         : document.getElementById("givenTo").value;
-    
-    if (!amount || !person) {
+    let purpose = document.getElementById("purpose").value; // Get purpose value
+
+    if (!amount || !person || !purpose) {
         alert("Please fill all fields!");
         return;
     }
 
-    // Store new transaction at the beginning (to keep newest first)
+    // Store the transaction with purpose
     transactions.unshift({
         date: new Date().toLocaleDateString(),
         user: person,
         amount: `$${amount}`,
-        type: transactionType
+        type: transactionType,
+        purpose: purpose  // ✅ Store purpose properly
     });
 
-    // Reset to first page when adding a new transaction
-    currentPage = 1;
-    
     updateTable(); // Refresh table
 
     // Reset Form
     document.getElementById("amount").value = "";
     document.getElementById("givenBy").value = "";
     document.getElementById("givenTo").value = "";
+    document.getElementById("purpose").value = ""; // ✅ Reset purpose field
 
+    // Hide input fields again
     document.getElementById("givenBy").style.display = "none";
     document.getElementById("givenTo").style.display = "none";
+    document.getElementById("purpose").style.display = "none"; // ✅ Hide purpose field
 
     document.querySelector(".add-money").style.display = "block";
     document.querySelector(".withdraw-money").style.display = "block";
@@ -61,12 +63,14 @@ function updateTable() {
             <td>${transaction.user}</td>
             <td>${transaction.amount}</td>
             <td>${transaction.type}</td>
+            <td>${transaction.purpose}</td> <!-- ✅ Purpose column correctly placed -->
             <td><button onclick="deleteTransaction('${transaction.date}', '${transaction.user}')">🗑 Delete</button></td>
         `;
     });
 
     updatePagination(); // Update pagination controls
 }
+
 
 // Function to delete a transaction
 function deleteTransaction(date, user) {
@@ -210,6 +214,7 @@ function showGivenBy() {
     transactionType = "Add Money";
     document.getElementById("givenBy").style.display = "block";
     document.getElementById("givenTo").style.display = "none";
+    document.getElementById("purpose").style.display = "block"; // Show purpose field
     
     document.querySelector(".add-money").style.display = "none";
     document.querySelector(".withdraw-money").style.display = "none";
@@ -220,49 +225,12 @@ function showGivenTo() {
     transactionType = "Withdraw Money";
     document.getElementById("givenBy").style.display = "none";
     document.getElementById("givenTo").style.display = "block";
+    document.getElementById("purpose").style.display = "block"; // Show purpose field
     
     document.querySelector(".add-money").style.display = "none";
     document.querySelector(".withdraw-money").style.display = "none";
     document.querySelector(".confirm-btn").style.display = "block";
 }
-
-function confirmTransaction() {
-    let amount = document.getElementById("amount").value;
-    let person = transactionType === "Add Money" 
-        ? document.getElementById("givenBy").value 
-        : document.getElementById("givenTo").value;
-    
-    if (!amount || !person) {
-        alert("Please fill all fields!");
-        return;
-    }
-
-    let transactionTable = document.getElementById("transactionTable");
-    let newRow = transactionTable.insertRow();
-
-    newRow.innerHTML = `
-        <td>${new Date().toLocaleDateString()}</td>
-        <td>${person}</td>
-        <td>$${amount}</td>
-        <td>${transactionType}</td>
-        <td><button onclick="deleteTransaction(this)">🗑 Delete</button></td>
-    `;
-
-    // Reset Form
-    document.getElementById("amount").value = "";
-    document.getElementById("givenBy").value = "";
-    document.getElementById("givenTo").value = "";
-
-    document.getElementById("givenBy").style.display = "none";
-    document.getElementById("givenTo").style.display = "none";
-
-    document.querySelector(".add-money").style.display = "block";
-    document.querySelector(".withdraw-money").style.display = "block";
-    document.querySelector(".confirm-btn").style.display = "none";
-}
-
-// Include Chart.js in HTML
-// <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 // Initialize Data
 let balanceHistory = {
@@ -326,58 +294,6 @@ function filterBalanceChart() {
 
     balanceChart.update();
 }
-
-// Function to Confirm Transaction & Update Chart
-function confirmTransaction() {
-    let amount = document.getElementById("amount").value;
-    let person = transactionType === "Add Money" 
-        ? document.getElementById("givenBy").value 
-        : document.getElementById("givenTo").value;
-    
-    if (!amount || !person) {
-        alert("Please fill all fields!");
-        return;
-    }
-
-    let transactionDate = new Date().toISOString();
-    let newBalance = parseFloat(document.getElementById("totalBalance").textContent.replace("$", "")) + 
-                     (transactionType === "Add Money" ? parseFloat(amount) : -parseFloat(amount));
-
-    // Update UI
-    document.getElementById("totalBalance").textContent = `$${newBalance.toFixed(2)}`;
-
-    // Store new transaction
-    transactions.unshift({
-        date: new Date().toLocaleDateString(),
-        user: person,
-        amount: `$${amount}`,
-        type: transactionType
-    });
-
-    updateTable(); // Refresh transaction table
-    updateBalanceChart(transactionDate, newBalance); // Update Chart
-
-    // Reset Form
-    document.getElementById("amount").value = "";
-    document.getElementById("givenBy").value = "";
-    document.getElementById("givenTo").value = "";
-
-    document.getElementById("givenBy").style.display = "none";
-    document.getElementById("givenTo").style.display = "none";
-
-    document.querySelector(".add-money").style.display = "block";
-    document.querySelector(".withdraw-money").style.display = "block";
-    document.querySelector(".confirm-btn").style.display = "none";
-}
-
-
-// Function to delete a transaction
-// function deleteTransaction(button) {
-//     button.parentElement.parentElement.remove();
-// }
-
-
-
 
 // Load transactions on page load
 window.onload = loadTransactions;

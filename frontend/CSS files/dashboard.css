@@ -31,7 +31,7 @@ body {
 }
 
 .sidebar ul li {
-    padding: 15px 10px;
+    padding: 20px 20px;
 }
 
 .sidebar ul li a {
@@ -44,11 +44,13 @@ body {
     background: linear-gradient(to right, #6a11cb, #2575fc);
     padding-left: 15px;
     transition: 0.3s;
+    box-shadow: 2px 2px 5px white;
+    border-radius: 5px;
 }
 
 /* Sidebar Toggle Button */
 .toggle-btn {
-    background: none;
+    background: linear-gradient(to right, #6a11cb, #2575fc);
     border: none;
     color: white;
     font-size: 22px;
@@ -60,9 +62,6 @@ body {
 .sidebar.hidden {
     left: -250px; /* Move sidebar off-screen */
 }
-
-
-
 
 /* Main Content */
 .main-content {
@@ -77,10 +76,6 @@ body {
     margin-left: 20px;
     width: calc(100% - 20px);
 }
-/* Adjust when sidebar is hidden */
-/* .main-content.expanded {
-    margin-left: 20px;
-} */
 
 /* Header */
 header {
@@ -93,7 +88,6 @@ header {
     box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
 }
 
-/* Left Section (Dashboard + Sidebar Toggle) */
 .header-left {
     display: flex;
     align-items: center;
@@ -104,7 +98,6 @@ header {
     font-size: 22px;
 }
 
-/* Right Section (Profile & Logout) */
 .header-right {
     display: flex;
     gap: 15px;
@@ -128,7 +121,6 @@ header {
     color: white;
 }
 
-/* Hover Effects */
 .profile-btn:hover {
     background: #2980b9;
 }
@@ -137,22 +129,27 @@ header {
     background: #c0392b;
 }
 
-
-/* Stats & Chart Container */
-.stats-container {
+/* Stats and Management Container */
+.stats-management-container {
     display: flex;
     justify-content: space-between;
-    align-items: center;
     gap: 20px;
     padding: 20px;
 }
 
-/* Left Side (Total Balance + Transactions) */
+.left-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    
+}
+
 .stats {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    flex: 1;
+    
 }
 
 .card {
@@ -160,50 +157,15 @@ header {
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    
 }
 
-.chart-container {
-    flex: 1;
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-}
-
-.chart-container select {
-    margin-bottom: 10px;
-    padding: 5px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-/* Ensure Chart is Responsive */
-.chart-container canvas {
-    width: 100% !important;
-    height: 300px !important;
-}
-
-
-/* Responsive Design for Small Screens */
-@media (max-width: 768px) {
-    .stats-container {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .chart-container {
-        width: 100%;
-    }
-}
-
-
-/* Money Management Section */
 .money-management {
-    margin-top: 30px;
-    background: white;
+    background: #f8f9fa;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    
 }
 
 .actions {
@@ -225,14 +187,33 @@ header {
     cursor: pointer;
 }
 
-.add-money {
-    background: #27ae60;
-    color: white;
+.right-container {
+    flex: 1;
 }
 
-.withdraw-money {
-    background: #c0392b;
-    color: white;
+.chart-container {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.chart-container select {
+    margin-bottom: 10px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.chart-container canvas {
+    width: 100% !important;
+    height: 300px !important;
+}
+
+@media (max-width: 768px) {
+    .stats-management-container {
+        flex-direction: column;
+    }
 }
 
 /* Table */
@@ -254,12 +235,10 @@ th {
     color: white;
 }
 
-/* Hover Effect */
 tr:hover {
     background: #f1f1f1;
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
     .sidebar {
         width: 200px;
@@ -281,77 +260,50 @@ tr:hover {
     }
 }
 
-/* Floating Toggle Button (Visible When Sidebar is Hidden) */
-.floating-btn {
-    position: fixed;
-    top: 15px;
-    left: 15px;
+.add-money{
+    background-color: rgb(102, 223, 102);
+}
+.add-money:hover{
+    background-color: rgb(102, 223, 102, 0.9);
+    box-shadow: 2px 2px 5px green;
+
+}
+.withdraw-money{
+    background-color: #e75241;
+}
+.withdraw-money:hover{
+    background-color: #e75241;
+    box-shadow: 2px 2px 5px rgb(184, 30, 30);
+}
+.confirm-btn{
+    background-color: #3498db;
+}
+.confirm-btn:hover{
+    background-color: #3498db;
+    box-shadow: 2px 2px 5px rgb(54, 115, 219);
+}
+
+.toggle-btn {
+    position: absolute;
+    left: 10px;  /* Moves it to the extreme left */
+    top: 20px;   /* Adjust vertical positioning */
     background: linear-gradient(to right, #6a11cb, #2575fc);
-    color: white;
+    border-radius: 10px;
     border: none;
-    padding: 10px 15px;
+    color: white;
     font-size: 22px;
     cursor: pointer;
-    border-radius: 5px;
-    display: none; /* Initially Hidden */
-}
-
-/* Show Floating Button When Sidebar is Hidden */
-.sidebar.hidden + .floating-btn {
-    display: block;
-}
-
-/* Transaction Filter Dropdown */
-#monthFilter {
-    margin-top: 10px;
-    padding: 5px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-/* Confirm Button */
-.confirm-btn {
-    background: #2ecc71;
-    color: white;
     padding: 10px;
-    border: none;
+    margin: 10px;
+    z-index: 1000; /* Ensures it's always on top */
+}
+
+#monthFilter{
+    background-color: #d5e7f3;
     border-radius: 5px;
-    cursor: pointer;
 }
 
-.confirm-btn:hover {
-    background: #27ae60;
-}
-
-/* Delete Button */
-button.delete {
-    background: #e74c3c;
-    color: white;
-    padding: 5px;
-    border: none;
+#balanceMonthFilter{
+    background-color: #d5e7f3;
     border-radius: 5px;
-    cursor: pointer;
 }
-
-/* Pagination Container */
-.pagination-container {
-    margin-top: 20px;
-    text-align: center; /* Center the buttons */
-}
-
-/* Pagination Buttons */
-.pagination-container button {
-    background: #3498db;
-    color: white;
-    padding: 8px 12px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin: 0 10px;
-}
-
-.pagination-container button:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-}
-
