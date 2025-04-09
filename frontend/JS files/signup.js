@@ -30,7 +30,7 @@ async function signUp() {
         return;
     }
 
-    let endpoint = userType === "admin" ? "signup/admin" : "signup/user"; // Use correct API route
+    let endpoint = userType === "admin" ? "admin/signup" : "user/signup"; 
 
     try {
         const response = await fetch(`http://localhost:5000/${endpoint}`, {

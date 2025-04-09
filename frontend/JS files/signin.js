@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        let endpoint = userType === "admin" ? "login/admin" : "login/user"; // Use correct API route
+        let endpoint = userType === "admin" ? "admin/login" : "user/login"; 
 
         try {
             const response = await fetch(`http://localhost:5000/${endpoint}`, {
