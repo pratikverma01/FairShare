@@ -1,56 +1,139 @@
-let transactions = []; // Store all transactions
+let currentType = "";
+let transactions = [];
 let currentPage = 1;
-const transactionsPerPage = 10;
+const transactionsPerPage = 5;
+let totalBalance = 0;
 
-// Function to add a new transaction
-function confirmTransaction() {
-    let amount = document.getElementById("amount").value;
-    let person = transactionType === "Add Money" 
-        ? document.getElementById("givenBy").value 
-        : document.getElementById("givenTo").value;
-    let purpose = document.getElementById("purpose").value; // Get purpose value
+// Chart Setup
+let balanceHistory = {
+    labels: [],
+    datasets: [{
+        label: "Total Balance Over Time",
+        data: [],
+        backgroundColor: "rgba(75, 192, 192, 0.5)",
+        borderColor: "rgba(75, 192, 192, 1)",
+        borderWidth: 2,
+        fill: false
+    }]
+};
 
-    if (!amount || !person || !purpose) {
-        alert("Please fill all fields!");
-        return;
+let ctx = document.getElementById("balanceChart").getContext("2d");
+let balanceChart = new Chart(ctx, {
+    type: "line",
+    data: balanceHistory,
+    options: {
+        responsive: true,
+        scales: { y: { beginAtZero: false } }
+    }
+});
+
+function handleTransactionType(type) {
+    const amountInput = document.getElementById("amount");
+    const amount = parseFloat(amountInput.value.trim());
+
+    if (isNaN(amount) || amount <= 0) {
+        return Swal.fire("Invalid Amount", "Please enter a valid amount first.", "warning");
     }
 
-    // Store the transaction with purpose
-    transactions.unshift({
-        date: new Date().toLocaleDateString(),
-        user: person,
-        amount: `$${amount}`,
-        type: transactionType,
-        purpose: purpose  // ✅ Store purpose properly
-    });
+    currentType = type;
 
-    updateTable(); // Refresh table
+    // Show only the relevant input field based on transaction type
+    document.getElementById("givenBy").style.display = type === "Add Money" ? "block" : "none";
+    document.getElementById("givenTo").style.display = type === "Withdraw Money" ? "block" : "none";
+    document.getElementById("purpose").style.display = "block";
 
-    // Reset Form
-    document.getElementById("amount").value = "";
-    document.getElementById("givenBy").value = "";
-    document.getElementById("givenTo").value = "";
-    document.getElementById("purpose").value = ""; // ✅ Reset purpose field
+    // Hide action buttons
+    document.querySelector(".add-money-btn").style.display = "none";
+    document.querySelector(".withdraw-money-btn").style.display = "none";
 
-    // Hide input fields again
-    document.getElementById("givenBy").style.display = "none";
-    document.getElementById("givenTo").style.display = "none";
-    document.getElementById("purpose").style.display = "none"; // ✅ Hide purpose field
-
-    document.querySelector(".add-money").style.display = "block";
-    document.querySelector(".withdraw-money").style.display = "block";
-    document.querySelector(".confirm-btn").style.display = "none";
+    // Show confirm button
+    document.querySelector(".confirm-btn").style.display = "inline-block";
 }
 
-// Function to update the transaction table
+
+
+function confirmTransaction() {
+    const amountInput = document.getElementById("amount");
+    const amount = parseFloat(amountInput.value.trim());
+    const purpose = document.getElementById("purpose").value.trim();
+    const username = currentType === "Add Money"
+        ? document.getElementById("givenBy").value.trim()
+        : document.getElementById("givenTo").value.trim();
+    const room_code = localStorage.getItem("roomCode");
+    const userType = localStorage.getItem("userType");
+
+    if (userType !== "admin") {
+        return Swal.fire("Access Denied", "Only admins can perform this action.", "error");
+    }
+
+    if (!room_code || !username || isNaN(amount) || !purpose || !currentType) {
+        return Swal.fire("Incomplete Data", "Please fill all required fields.", "warning");
+    }
+
+    if (currentType === "Withdraw Money" && amount > totalBalance) {
+        return Swal.fire("Insufficient Funds", "Withdrawal amount exceeds current balance.", "error");
+    }
+
+    fetch("http://localhost:5000/dashboard/transaction", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, room_code, type: currentType, amount, purpose })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.message) {
+            Swal.fire("Success!", data.message, "success").then(() => {
+                location.reload();
+            });
+        } else {
+            Swal.fire("Error", data.error || "Transaction failed", "error");
+        }
+    })
+    .catch(err => {
+        console.error("Transaction error:", err);
+        Swal.fire("Error", "Server error during transaction", "error");
+    });
+}
+
+async function fetchTransactions(roomCode) {
+    try {
+        const response = await fetch(`http://localhost:5000/dashboard/transactions?room_code=${roomCode}`);
+        transactions = await response.json();
+        calculateBalance();
+        updateTable();
+    } catch (error) {
+        console.error("Error fetching transactions:", error);
+    }
+}
+
+function calculateBalance() {
+    totalBalance = transactions.reduce((acc, txn) => {
+        return txn.type === "Add Money"
+            ? acc + parseFloat(txn.amount)
+            : acc - parseFloat(txn.amount);
+    }, 0);
+
+    document.getElementById("totalBalance").textContent = `₹${totalBalance.toFixed(2)}`;
+
+    balanceHistory.labels = transactions.map(txn => new Date(txn.date).toLocaleDateString());
+    balanceHistory.datasets[0].data = [];
+    let runningBalance = 0;
+    transactions.forEach(txn => {
+        runningBalance += txn.type === "Add Money"
+            ? parseFloat(txn.amount)
+            : -parseFloat(txn.amount);
+        balanceHistory.datasets[0].data.push(runningBalance);
+    });
+
+    balanceChart.update();
+}
+
 function updateTable() {
     let transactionTable = document.getElementById("transactionTable");
-    transactionTable.innerHTML = ""; // Clear existing table data
+    transactionTable.innerHTML = "";
 
     let totalPages = Math.ceil(transactions.length / transactionsPerPage);
-    if (currentPage > totalPages) {
-        currentPage = totalPages || 1; // Ensure page is within valid range
-    }
+    if (currentPage > totalPages) currentPage = totalPages || 1;
 
     let startIndex = (currentPage - 1) * transactionsPerPage;
     let endIndex = startIndex + transactionsPerPage;
@@ -60,44 +143,25 @@ function updateTable() {
         let newRow = transactionTable.insertRow();
         newRow.innerHTML = `
             <td>${transaction.date}</td>
-            <td>${transaction.user}</td>
-            <td>${transaction.amount}</td>
+            <td>${transaction.username}</td>
+            <td>₹${transaction.amount}</td>
             <td>${transaction.type}</td>
-            <td>${transaction.purpose}</td> <!-- ✅ Purpose column correctly placed -->
-            <td><button onclick="deleteTransaction('${transaction.date}', '${transaction.user}')">🗑 Delete</button></td>
+            <td>${transaction.purpose}</td>
+            <td><button onclick="deleteTransaction('${transaction.id}')">🗑 Delete</button></td>
         `;
     });
 
-    updatePagination(); // Update pagination controls
+    updatePagination();
 }
 
-
-// Function to delete a transaction
-function deleteTransaction(date, user) {
-    transactions = transactions.filter(t => !(t.date === date && t.user === user));
-    updateTable(); // Refresh table
-}
-
-// Function for pagination controls
-// Function to update pagination controls
 function updatePagination() {
     let totalPages = Math.ceil(transactions.length / transactionsPerPage);
-    let paginationContainer = document.getElementById("paginationContainer");
-
-    if (totalPages > 1) {
-        paginationContainer.style.display = "block"; // Show pagination if more than 1 page
-    } else {
-        paginationContainer.style.display = "none"; // Hide pagination if only 1 page
-    }
-
+    document.getElementById("paginationContainer").style.display = totalPages > 1 ? "block" : "none";
     document.getElementById("pageInfo").textContent = `Page ${currentPage} of ${totalPages || 1}`;
     document.getElementById("prevBtn").disabled = currentPage === 1;
     document.getElementById("nextBtn").disabled = currentPage >= totalPages;
 }
 
-
-
-// Function to go to the previous page
 function prevPage() {
     if (currentPage > 1) {
         currentPage--;
@@ -105,7 +169,6 @@ function prevPage() {
     }
 }
 
-// Function to go to the next page
 function nextPage() {
     let totalPages = Math.ceil(transactions.length / transactionsPerPage);
     if (currentPage < totalPages) {
@@ -114,41 +177,24 @@ function nextPage() {
     }
 }
 
-
-
-function loadTransactions() {
-    let table = document.getElementById("transactionTable");
-    table.innerHTML = "";
-
-    transactions.forEach((t) => {
-        let row = `<tr>
-            <td>${t.date}</td>
-            <td>${t.user}</td>
-            <td>${t.amount}</td>
-            <td>${t.status}</td>
-        </tr>`;
-        table.innerHTML += row;
-    });
-}
-
 function searchTransactions() {
     let userName = document.getElementById("searchUser").value.toLowerCase();
     let searchDate = document.getElementById("searchDate").value;
-
-    let filtered = transactions.filter(t => 
-        (userName ? t.user.toLowerCase().includes(userName) : true) &&
+    let filtered = transactions.filter(t =>
+        (userName ? t.username.toLowerCase().includes(userName) : true) &&
         (searchDate ? t.date === searchDate : true)
     );
 
     let table = document.getElementById("transactionTable");
     table.innerHTML = "";
-
-    filtered.forEach((t) => {
+    filtered.forEach(t => {
         let row = `<tr>
             <td>${t.date}</td>
-            <td>${t.user}</td>
+            <td>${t.username}</td>
             <td>${t.amount}</td>
-            <td>${t.status}</td>
+            <td>${t.type}</td>
+            <td>${t.purpose}</td>
+            <td>—</td>
         </tr>`;
         table.innerHTML += row;
     });
@@ -158,117 +204,29 @@ function toggleTheme() {
     document.body.classList.toggle("dark-mode");
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-    let sidebar = document.getElementById("sidebar");
-    let mainContent = document.getElementById("mainContent");
-
-    // Ensure sidebar is closed when the page loads
-    sidebar.classList.add("hidden");
-    mainContent.classList.add("expanded");
-});
-
-function toggleSidebar() {
-    let sidebar = document.getElementById("sidebar");
-    let mainContent = document.getElementById("mainContent");
-    let toggleBtn = document.getElementById("floatingToggle");
-
-    if (sidebar.classList.contains("hidden")) {
-        sidebar.classList.remove("hidden"); // Show Sidebar
-        mainContent.classList.remove("expanded"); // Move Dashboard
-        toggleBtn.style.display = "none"; // Hide Floating Button
-    } else {
-        sidebar.classList.add("hidden"); // Hide Sidebar
-        mainContent.classList.add("expanded"); // Expand Dashboard
-        toggleBtn.style.display = "block"; // Show Floating Button
-    }
-}
-
-
-
 function filterTransactions() {
     let selectedMonth = document.getElementById("monthFilter").value;
-    let allTransactions = document.querySelectorAll("#transactionTable tr"); // Get all transactions
+    let rows = document.querySelectorAll("#transactionTable tr");
     let count = 0;
 
-    allTransactions.forEach(row => {
-        let dateCell = row.querySelector("td:first-child"); // Get date column
+    rows.forEach(row => {
+        let dateCell = row.querySelector("td:first-child");
         if (dateCell) {
             let transactionDate = new Date(dateCell.textContent);
-            let transactionMonth = transactionDate.getMonth() + 1; // Get month (1-12)
+            let transactionMonth = transactionDate.getMonth() + 1;
 
             if (selectedMonth === "all" || transactionMonth == selectedMonth) {
-                row.style.display = ""; // Show matching transactions
+                row.style.display = "";
                 count++;
             } else {
-                row.style.display = "none"; // Hide non-matching transactions
+                row.style.display = "none";
             }
         }
     });
 
-    document.getElementById("totalTransactions").textContent = count; // Update transaction count
+    document.getElementById("totalTransactions").textContent = count;
 }
 
-let transactionType = ""; // Stores whether it's "Add" or "Withdraw"
-
-function showGivenBy() {
-    transactionType = "Add Money";
-    document.getElementById("givenBy").style.display = "block";
-    document.getElementById("givenTo").style.display = "none";
-    document.getElementById("purpose").style.display = "block"; // Show purpose field
-    
-    document.querySelector(".add-money").style.display = "none";
-    document.querySelector(".withdraw-money").style.display = "none";
-    document.querySelector(".confirm-btn").style.display = "block";
-}
-
-function showGivenTo() {
-    transactionType = "Withdraw Money";
-    document.getElementById("givenBy").style.display = "none";
-    document.getElementById("givenTo").style.display = "block";
-    document.getElementById("purpose").style.display = "block"; // Show purpose field
-    
-    document.querySelector(".add-money").style.display = "none";
-    document.querySelector(".withdraw-money").style.display = "none";
-    document.querySelector(".confirm-btn").style.display = "block";
-}
-
-// Initialize Data
-let balanceHistory = {
-    labels: [], // Dates
-    datasets: [{
-        label: "Total Balance Over Time",
-        data: [], // Balance at each transaction
-        backgroundColor: "rgba(75, 192, 192, 0.5)",
-        borderColor: "rgba(75, 192, 192, 1)",
-        borderWidth: 2,
-        fill: false
-    }]
-};
-
-// Create Chart
-let ctx = document.getElementById("balanceChart").getContext("2d");
-let balanceChart = new Chart(ctx, {
-    type: "line", // Line chart for balance trend
-    data: balanceHistory,
-    options: {
-        responsive: true,
-        scales: {
-            y: { beginAtZero: false }
-        }
-    }
-});
-
-// Function to Update Chart When Transactions Are Added
-function updateBalanceChart(transactionDate, newBalance) {
-    let formattedDate = new Date(transactionDate).toLocaleDateString();
-
-    balanceHistory.labels.push(formattedDate);
-    balanceHistory.datasets[0].data.push(newBalance);
-
-    balanceChart.update(); // Refresh Chart
-}
-
-// Function to Filter Balance Chart by Month
 function filterBalanceChart() {
     let selectedMonth = document.getElementById("balanceMonthFilter").value;
 
@@ -295,5 +253,29 @@ function filterBalanceChart() {
     balanceChart.update();
 }
 
-// Load transactions on page load
-window.onload = loadTransactions;
+function toggleSidebar() {
+    let sidebar = document.getElementById("sidebar");
+    let mainContent = document.getElementById("mainContent");
+    let toggleBtn = document.getElementById("floatingToggle");
+
+    if (sidebar.classList.contains("hidden")) {
+        sidebar.classList.remove("hidden");
+        mainContent.classList.remove("expanded");
+        toggleBtn.style.display = "none";
+    } else {
+        sidebar.classList.add("hidden");
+        mainContent.classList.add("expanded");
+        toggleBtn.style.display = "block";
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const roomCode = localStorage.getItem("roomCode");
+    if (roomCode) fetchTransactions(roomCode);
+
+    let sidebar = document.getElementById("sidebar");
+    let mainContent = document.getElementById("mainContent");
+
+    sidebar.classList.add("hidden");
+    mainContent.classList.add("expanded");
+});

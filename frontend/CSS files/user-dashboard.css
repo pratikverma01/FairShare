@@ -260,18 +260,18 @@ tr:hover {
     }
 }
 
-.add-money-btn{
+.add-money{
     background-color: rgb(102, 223, 102);
 }
-.add-money-btn:hover{
+.add-money:hover{
     background-color: rgb(102, 223, 102, 0.9);
     box-shadow: 2px 2px 5px green;
 
 }
-.withdraw-money-btn{
+.withdraw-money{
     background-color: #e75241;
 }
-.withdraw-money-btn:hover{
+.withdraw-money:hover{
     background-color: #e75241;
     box-shadow: 2px 2px 5px rgb(184, 30, 30);
 }

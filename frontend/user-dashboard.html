@@ -3,12 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
+    <title>User Dashboard</title>
     <link rel="stylesheet" href="CSS files/dashboard.css">
-    <!-- <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 </head>
 <body>
 
@@ -54,7 +52,7 @@
                     </div>
                     <div class="card">
                         <h3>Total Transactions This Month</h3>
-                        <p id="totalTransactions">0</p>
+                        <p id="totalTransactions">25</p>
                         <select id="monthFilter" onchange="filterTransactions()">
                             <option value="all">All Months</option>
                             <option value="1">January</option>
@@ -73,21 +71,6 @@
                     </div>
                 </div>
 
-                <!-- Money Management Section Moved Below Transactions -->
-                <div class="money-management">
-                    <h2>Manage Transactions</h2>
-                    <div class="actions">
-                        <input type="text" id="amount" placeholder="Enter Amount">
-                        <input type="text" id="givenBy" placeholder="Given By" style="display: none;">
-                        <input type="text" id="givenTo" placeholder="Given To" style="display: none;">
-                        <input type="text" id="purpose" placeholder="Enter Purpose" style="display: none;">
-                
-                        <button class="add-money-btn" onclick="handleTransactionType('Add Money')">Add Money</button>
-                        <button class="withdraw-money-btn" onclick="handleTransactionType('Withdraw Money')">Withdraw Money</button>
-                
-                        <button class="confirm-btn" onclick="confirmTransaction()" style="display: none;">Confirm</button>
-                    </div>
-                </div>
                 
             </div>
 
@@ -124,7 +107,7 @@
                     <th>Amount</th>
                     <th>Type</th>
                     <th>Purpose</th>
-                    <!-- <th>Action</th> -->
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody id="transactionTable">
