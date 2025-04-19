@@ -153,7 +153,11 @@ header {
 }
 
 .card {
-    background: #f8f9fa;
+    /* background: #f8f9fa; */
+    /* background: #4587f7; */
+    background: linear-gradient(to right, #6a11cb, #2575fc);
+    color: white;
+    opacity: 0.9;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
@@ -161,7 +165,10 @@ header {
 }
 
 .money-management {
-    background: #f8f9fa;
+    /* background: #f8f9fa; */
+    background: linear-gradient(to right, #6a11cb, #2575fc);
+    color: white;
+    opacity: 0.9;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
@@ -224,6 +231,7 @@ table {
     margin-top: 20px;
     border-collapse: collapse;
     background: white;
+    
 }
 
 th, td {
@@ -278,10 +286,13 @@ tr:hover {
     box-shadow: 2px 2px 5px rgb(184, 30, 30);
 }
 .confirm-btn{
-    background-color: #3498db;
+    /* background-color: #3498db; */
+    background-color: #6a11cb;
+    color: white;
 }
 .confirm-btn:hover{
     background-color: #3498db;
+    /* background-color: #2575fc; */
     box-shadow: 2px 2px 5px rgb(54, 115, 219);
 }
 
@@ -301,7 +312,7 @@ tr:hover {
 }
 
 #monthFilter{
-    background-color: #d5e7f3;
+    background-color: #f4f4f4;
     border-radius: 5px;
 }
 
@@ -312,6 +323,10 @@ tr:hover {
 
 
 
+
+#tb{
+    padding: 5px 5px 5px 20px;
+}
 
 
 

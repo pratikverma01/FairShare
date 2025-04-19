@@ -14,7 +14,7 @@ let balanceHistory = {
         borderWidth: 2,
         fill: false,
         tension: 0.4,
-        pointRadius: 5,
+        pointRadius: 3,
         
         segment: {
             borderColor: ctx => {
@@ -331,3 +331,6 @@ document.addEventListener("DOMContentLoaded", () => {
     sidebar.classList.add("hidden");
     mainContent.classList.add("expanded");
 });
+
+
+
